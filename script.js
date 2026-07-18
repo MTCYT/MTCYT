@@ -1,12 +1,12 @@
 const youtubers = [
-    { name: 'XREALM', url: 'https://www.youtube.com/@XREALM' },
-    { name: 'MultiC12', url: 'https://www.youtube.com/@MultiC12' },
-    { name: 'JBTHECRAFTER', url: 'https://www.youtube.com/@JBTHECRAFTER' },
-    { name: 'ItzStrawberry', url: 'https://www.youtube.com/@ItzStrawberry' },
-    { name: 'game1kyt', url: 'https://www.youtube.com/@game1kyt' },
-    { name: 'RishabhProGamingRPG', url: 'https://www.youtube.com/@RishabhProGamingRPG' },
-    { name: 'TimmyLoal', url: 'https://www.youtube.com/@TimmyLoal' },
-    { name: 'Verxsion', url: 'https://www.youtube.com/@Verxsion' }
+    { name: 'XREALM', url: 'https://www.youtube.com/@XREALM', profileImg: 'IMG_5499.jpg' },
+    { name: 'MultiC12', url: 'https://www.youtube.com/@MultiC12', profileImg: 'IMG_5500.jpg' },
+    { name: 'JBTHECRAFTER', url: 'https://www.youtube.com/@JBTHECRAFTER', profileImg: 'IMG_5501.jpg' },
+    { name: 'ItzStrawberry', url: 'https://www.youtube.com/@ItzStrawberry', profileImg: 'IMG_5502.jpg' },
+    { name: 'game1kyt', url: 'https://www.youtube.com/@game1kyt', profileImg: 'IMG_5503.jpg' },
+    { name: 'RishabhProGamingRPG', url: 'https://www.youtube.com/@RishabhProGamingRPG', profileImg: 'IMG_5504.jpg' },
+    { name: 'TimmyLoal', url: 'https://www.youtube.com/@TimmyLoal', profileImg: 'IMG_5505.jpg' },
+    { name: 'Verxsion', url: 'https://www.youtube.com/@Verxsion', profileImg: 'IMG_5506.jpg' }
 ];
 
 const dashboard = document.getElementById('dashboard');
@@ -66,14 +66,16 @@ async function fetchYouTubeData(youtuber) {
         // Fetch subscriber count
         const subscriberCount = await getSubscriberCount(youtuber.url);
         
-        // YouTube channel thumbnail URL format
-        const thumbnail = `https://www.youtube.com/channel_thumbnail?url=${encodeURIComponent(youtuber.url)}`;
+        // Use custom profile image if provided
+        const thumbnail = youtuber.profileImg 
+            ? `./images/${youtuber.profileImg}` 
+            : `https://via.placeholder.com/120?text=${channelHandle}`;
         
         return {
             name: youtuber.name,
             url: youtuber.url,
             subscriberCount: subscriberCount || 0,
-            thumbnail: `https://via.placeholder.com/120?text=${channelHandle}`
+            thumbnail: thumbnail
         };
     } catch (error) {
         console.error(`Error fetching data for ${youtuber.name}:`, error);
@@ -81,7 +83,9 @@ async function fetchYouTubeData(youtuber) {
             name: youtuber.name,
             url: youtuber.url,
             subscriberCount: 0,
-            thumbnail: `https://via.placeholder.com/120?text=${youtuber.name}`
+            thumbnail: youtuber.profileImg 
+                ? `./images/${youtuber.profileImg}` 
+                : `https://via.placeholder.com/120?text=${youtuber.name}`
         };
     }
 }
