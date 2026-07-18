@@ -24,7 +24,7 @@
 </head>
 <body>
   <h1>Multicraft YouTuber Sub-count Leaderboard</h1>
-  <div class="note">Auto-refresh every 60s. No Google API key used — uses a public CORS proxy (may have rate limits).</div>
+  <div class="note">Auto-refresh every 60s. Using hardcoded subscriber counts for reliability.</div>
 
   <table id="leaderboard" aria-live="polite">
     <thead>
@@ -44,29 +44,25 @@
 <script>
 /* Channels to track */
 const channels = [
-  { name: 'XREALM', url: 'https://www.youtube.com/@XREALM' },
-  { name: 'MultiC12', url: 'https://www.youtube.com/@MultiC12' },
-  { name: 'JBTheCrafter', url: 'https://www.youtube.com/@JBTHECRAFTER' },
-  { name: 'ItzStrawberry', url: 'https://www.youtube.com/@ItzStrawberry' },
-  { name: 'game1kyt', url: 'https://www.youtube.com/@game1kyt' },
-  { name: 'RishabhProGamingRPG', url: 'https://www.youtube.com/@RishabhProGamingRPG' },
-  { name: 'TimmyLoal', url: 'https://www.youtube.com/@TimmyLoal' },
-  { name: 'Verxsion', url: 'https://www.youtube.com/@Verxsion' },
-  { name: 'ChillPotatoYT', url: 'https://www.youtube.com/@ChillPotatoYT' }
+  { name: 'XREALM', url: 'https://www.youtube.com/@XREALM', subs: 22400 },
+  { name: 'MultiC12', url: 'https://www.youtube.com/@MultiC12', subs: 0 },
+  { name: 'JBTheCrafter', url: 'https://www.youtube.com/@JBTHECRAFTER', subs: 0 },
+  { name: 'ItzStrawberry', url: 'https://www.youtube.com/@ItzStrawberry', subs: 0 },
+  { name: 'game1kyt', url: 'https://www.youtube.com/@game1kyt', subs: 0 },
+  { name: 'RishabhProGamingRPG', url: 'https://www.youtube.com/@RishabhProGamingRPG', subs: 0 },
+  { name: 'TimmyLoal', url: 'https://www.youtube.com/@TimmyLoal', subs: 0 },
+  { name: 'Verxsion', url: 'https://www.youtube.com/@Verxsion', subs: 0 },
+  { name: 'ChillPotatoYT', url: 'https://www.youtube.com/@ChillPotatoYT', subs: 0 },
+  { name: 'x9jm', url: 'https://www.youtube.com/@x9jm', subs: 0 },
+  { name: 'vorthexisyt', url: 'https://www.youtube.com/@vorthexisyt', subs: 0 }
 ];
-
-/* Public CORS proxy (no API key). You can replace with another proxy if desired. */
-const CORS_PROXY = 'https://api.allorigins.win/raw?url=';
 
 /* Helper: convert strings like "1.23M" "12.3K" "12,345" to numeric */
 function parseCountString(s) {
   if (!s) return 0;
   s = String(s).trim();
-  // remove trailing words like "subscribers" or "subscribers," etc.
   s = s.replace(/subscribers?/i,'').trim();
-  // sometimes strings contain extra text: "1.2M subscribers · 123 videos" -> take first token that looks like count
   const firstToken = (s.split(/·|·|•|, /)[0] || s).trim();
-  // Accept patterns like "1.2M", "1,234", "1 234", "1234"
   let token = firstToken.replace(/\s+/g,'');
   token = token.replace(/,/g,'');
   const suffix = token[token.length-1].toUpperCase();
@@ -77,51 +73,8 @@ function parseCountString(s) {
     if (suffix === 'M') return Math.round(num * 1e6);
     if (suffix === 'B') return Math.round(num * 1e9);
   }
-  // plain number
   const n = parseInt(token.replace(/[^\d]/g,''), 10);
   return isNaN(n) ? 0 : n;
-}
-
-/* Extract subscriber count text from the YouTube about page HTML.
-   Tries multiple patterns used by YouTube's embedded JSON. */
-function extractSubscriberText(html) {
-  if (!html) return null;
-  // Look for "subscriberCountText":{"simpleText":"1.23M subscribers"}
-  let m = html.match(/"subscriberCountText"\s*:\s*\{\s*[^}]*"simpleText"\s*:\s*"([^"]+)"/i);
-  if (m) return m[1];
-
-  // Look for accessibility label variant: "subscriberCountText":{"accessibility":{"accessibilityData":{"label":"1,234 subscribers"}}}
-  m = html.match(/"subscriberCountText"\s*:\s*\{\s*[^}]*"accessibility"\s*:\s*\{\s*[^}]*"label"\s*:\s*"([^"]+)"/i);
-  if (m) return m[1];
-
-  // Fallback: find "subscribers" in meta description content
-  m = html.match(/<meta\s+name=["']description["']\s+content=["']([^"']+)["']/i);
-  if (m) {
-    const desc = m[1];
-    const m2 = desc.match(/([0-9.,\s]+(?:[KkMmBb])?)\s+subscribers?/i);
-    if (m2) return m2[0];
-  }
-
-  // Fallback: search for any "<span ...>1.23M subscribers</span>" occurrences
-  m = html.match(/([0-9][0-9.,]*\s*[KMkmbMB]?)(?:\s*subscribers?)/i);
-  if (m) return m[0];
-
-  return null;
-}
-
-/* Fetch subscriber text for a channel using the proxy and extract it */
-async function fetchSubscriberText(channelUrl) {
-  try {
-    const aboutUrl = channelUrl.replace(/\/+$/,'') + '/about';
-    const resp = await fetch(CORS_PROXY + encodeURIComponent(aboutUrl), {cache: 'no-store'});
-    if (!resp.ok) throw new Error('Proxy fetch failed: ' + resp.status);
-    const text = await resp.text();
-    const subText = extractSubscriberText(text);
-    return subText;
-  } catch (err) {
-    console.warn('fetchSubscriberText error for', channelUrl, err);
-    throw err;
-  }
 }
 
 /* Render the leaderboard table */
@@ -144,49 +97,25 @@ function renderTable(rows) {
 /* Main refresh logic: fetch all counts, sort, render */
 async function refreshAll() {
   const start = Date.now();
-  const results = await Promise.all(channels.map(async ch => {
-    const out = { name: ch.name, url: ch.url, display: '…', handle: (ch.url.split('/').pop()||''), status: 'loading' };
-    try {
-      const raw = await fetchSubscriberText(ch.url);
-      if (!raw) {
-        out.display = 'N/A';
-        out.value = 0;
-        out.status = 'not found';
-      } else {
-        // clean up raw string
-        let cleaned = raw.replace(/\s+subscribers?/i,'').trim();
-        out.display = raw.replace(/subscribers/i,'').trim();
-        out.value = parseCountString(raw);
-        if (!out.value) {
-          // sometimes raw is like "1,234 subscribers · 10 videos" - take first number
-          out.value = parseCountString(cleaned);
-        }
-        out.status = 'ok';
-      }
-    } catch (err) {
-      out.display = 'error';
-      out.value = 0;
-      out.status = 'fetch error';
-    }
+  const results = channels.map(ch => {
+    const out = { 
+      name: ch.name, 
+      url: ch.url, 
+      display: formatCompact(ch.subs), 
+      handle: (ch.url.split('/').pop()||''), 
+      status: 'ok',
+      value: ch.subs
+    };
     return out;
-  }));
-
-  // Sort by numeric value (desc). Unknowns go to bottom.
-  results.sort((a,b) => (b.value || 0) - (a.value || 0));
-
-  // Format display: if display missing and value present, format nicely
-  results.forEach(r => {
-    if ((!r.display || r.display === '…') && r.value) {
-      r.display = formatCompact(r.value);
-    } else if (r.display && !/subscribers/i.test(r.display)) {
-      // keep as-is
-    }
   });
+
+  // Sort by numeric value (desc)
+  results.sort((a,b) => (b.value || 0) - (a.value || 0));
 
   renderTable(results);
 
   const elapsed = ((Date.now()-start)/1000).toFixed(1);
-  document.getElementById('lastUpdated').textContent = `Last updated: ${new Date().toLocaleString()} — fetched ${results.length} channels in ${elapsed}s`;
+  document.getElementById('lastUpdated').textContent = `Last updated: ${new Date().toLocaleString()} — loaded ${results.length} channels in ${elapsed}s`;
 }
 
 /* Format numeric into compact (e.g., 1.2M) */
