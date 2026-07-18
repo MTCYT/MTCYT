@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MTCYT - MultiCraft YouTuber Live Counter</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #121212; color: #fff; text-align: center; margin: 0; padding: 20px; }
+        h1 { color: #ff0000; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 2px; }
+        .subtitle { color: #888; margin-bottom: 35px; font-size: 0.95rem; }
+        .grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; max-width: 1200px; margin: 0 auto; }
+        .card { background: #1e1e1e; border: 2px solid #333; border-radius: 12px; padding: 20px; width: 210px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); transition: transform 0.2s, border-color 0.2s; }
+        .card:hover { transform: translateY(-5px); border-color: #ff0000; }
+        .avatar { width: 100px; height: 100px; border-radius: 50%; border: 3px solid #ff0000; object-fit: cover; background-color: #333; }
+        .name { font-size: 1.15rem; font-weight: bold; margin: 15px 0 5px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .subs { font-size: 1.1rem; color: #00ff66; font-weight: bold; }
+        .loading-text { color: #ffaa00; font-size: 1.2rem; }
+    </style>
+</head>
+<body>
+
+    <h1>MTCYT Dashboard</h1>
+    <div class="subtitle">Live MultiCraft Creator Statistics (Auto-refreshes every 60s)</div>
+    
+    <div class="grid" id="youtubers-grid">
+        <p class="loading-text">Initializing live dashboard...</p>
+    </div>
+
+    <script>
+        // Replace with your real YouTube Data API v3 key from Google Cloud Console
+        const API_KEY = 'YOUR_GOOGLE_API_KEY';
+        
+        // Your top 10 MultiCraft handles
+        const handles = [
+            'XREALM', 'MultiC12', 'JBTHECRAFTER', 'ItzStrawberry', 'game1kyt',
+            'RishabhProGamingRPG', 'TimmyLoal', 'Verxsion', 'OMG_JanaYT', 'ChillPotatoYT'
+        ];
+        
+        const grid = document.getElementById('youtubers-grid');
+
+        async function fetchChannelData(handle) {
+            try {
+                const url = `https://googleapis.com{handle}&key=${API_KEY}`;
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (data.items && data.items.length > 0) {
+                    const channel = data.items[0];
+                    const name = channel.snippet.title;
+                    const imgUrl = channel.snippet.thumbnails.medium.url;
+                    const subs = parseInt(channel.statistics.subscriberCount).toLocaleString();
+                    
+                    return `
+                        <div class="card">
+                            <img class="avatar" src="${imgUrl}" alt="${name}">
+                            <div class="name" title="${name}">${name}</div>
+                            <div class="subs">${subs}</div>
+                        </div>
+                    `;
+                }
+                return `<div class="card"><div class="name">@${handle}</div><div class="subs" style="color:#ff3333">Not Found</div></div>`;
+            } catch (error) {
+                console.error(error);
+                return `<div class="card"><div class="name">@${handle}</div><div class="subs" style="color:#ff3333">Error</div></div>`;
+            }
+        }
+
+        async function updateDashboard() {
+            const cardPromises = handles.map(handle => fetchChannelData(handle));
+            const cardsHtml = await Promise.all(cardPromises);
+            grid.innerHTML = cardsHtml.join('');
+        }
+
+        // Security check and boot logic
+        if (API_KEY === 'YOUR_GOOGLE_API_KEY') {
+            grid.innerHTML = '<p style="color: #ffaa00; font-size: 1.2rem;">Please replace "YOUR_GOOGLE_API_KEY" in the code with your actual API key to load live data!</p>';
+        } else {
+            // Initial load
+            updateDashboard();
+            // Automatically refresh stats every 60 seconds
+            setInterval(updateDashboard, 60000);
+        }
+    </script>
+</body>
+</html>
