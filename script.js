@@ -1,25 +1,13 @@
 const youtubers = [
-    { name: 'XREALM', url: 'https://www.youtube.com/@XREALM', channelId: 'UC_placeholder1' },
-    { name: 'MultiC12', url: 'https://www.youtube.com/@MultiC12', channelId: 'UC_placeholder2' },
-    { name: 'JBTHECRAFTER', url: 'https://www.youtube.com/@JBTHECRAFTER', channelId: 'UC_placeholder3' },
-    { name: 'ItzStrawberry', url: 'https://www.youtube.com/@ItzStrawberry', channelId: 'UC_placeholder4' },
-    { name: 'game1kyt', url: 'https://www.youtube.com/@game1kyt', channelId: 'UC_placeholder5' },
-    { name: 'RishabhProGamingRPG', url: 'https://www.youtube.com/@RishabhProGamingRPG', channelId: 'UC_placeholder6' },
-    { name: 'TimmyLoal', url: 'https://www.youtube.com/@TimmyLoal', channelId: 'UC_placeholder7' },
-    { name: 'Verxsion', url: 'https://www.youtube.com/@Verxsion', channelId: 'UC_placeholder8' }
+    { name: 'XREALM', url: 'https://www.youtube.com/@XREALM' },
+    { name: 'MultiC12', url: 'https://www.youtube.com/@MultiC12' },
+    { name: 'JBTHECRAFTER', url: 'https://www.youtube.com/@JBTHECRAFTER' },
+    { name: 'ItzStrawberry', url: 'https://www.youtube.com/@ItzStrawberry' },
+    { name: 'game1kyt', url: 'https://www.youtube.com/@game1kyt' },
+    { name: 'RishabhProGamingRPG', url: 'https://www.youtube.com/@RishabhProGamingRPG' },
+    { name: 'TimmyLoal', url: 'https://www.youtube.com/@TimmyLoal' },
+    { name: 'Verxsion', url: 'https://www.youtube.com/@Verxsion' }
 ];
-
-// Mock data for subscriber counts (replace with real API calls)
-const mockSubscribers = {
-    'XREALM': 1250000,
-    'MultiC12': 890000,
-    'JBTHECRAFTER': 756000,
-    'ItzStrawberry': 645000,
-    'game1kyt': 534000,
-    'RishabhProGamingRPG': 423000,
-    'TimmyLoal': 312000,
-    'Verxsion': 201000
-};
 
 const dashboard = document.getElementById('dashboard');
 const lastUpdateSpan = document.getElementById('lastUpdate');
@@ -35,21 +23,66 @@ function formatNumber(num) {
     return num.toString();
 }
 
-// Fetch channel data from YouTube (requires API key)
-async function getYouTubeChannelData(youtuber) {
+// Fetch subscriber count using YouTube Scraper API (free)
+async function getSubscriberCount(channelUrl) {
     try {
-        // For now, return mock data
-        // To use real data, replace with actual YouTube Data API calls
+        const channelHandle = channelUrl.split('@')[1];
+        
+        // Using YouTube Scraper API
+        const apiUrl = `https://www.youtube.com/@${channelHandle}`;
+        
+        // Fetch the page
+        const response = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(apiUrl)}`);
+        const data = await response.json();
+        
+        if (data.contents) {
+            // Extract subscriber count from page content
+            const match = data.contents.match(/([0-9.]+[KMB])\s*subscribers/i) || 
+                         data.contents.match(/"subscriberCountText":\{"simpleText":"([^"]+)"/);
+            
+            if (match) {
+                let count = match[1];
+                count = count.replace(/[A-Z]/gi, (char) => {
+                    if (char.toUpperCase() === 'K') return '000';
+                    if (char.toUpperCase() === 'M') return '000000';
+                    if (char.toUpperCase() === 'B') return '000000000';
+                    return '';
+                });
+                return parseInt(count.replace(/[^0-9]/g, '')) || 0;
+            }
+        }
+        return 0;
+    } catch (error) {
+        console.error(`Error fetching subscriber count:`, error);
+        return 0;
+    }
+}
+
+// Fetch YouTube channel data
+async function fetchYouTubeData(youtuber) {
+    try {
+        const channelHandle = youtuber.url.split('@')[1];
+        
+        // Fetch subscriber count
+        const subscriberCount = await getSubscriberCount(youtuber.url);
+        
+        // YouTube channel thumbnail URL format
+        const thumbnail = `https://www.youtube.com/channel_thumbnail?url=${encodeURIComponent(youtuber.url)}`;
+        
         return {
             name: youtuber.name,
             url: youtuber.url,
-            subscriberCount: mockSubscribers[youtuber.name] || 0,
-            thumbnail: `https://via.placeholder.com/120?text=${youtuber.name}`,
-            channelId: youtuber.channelId
+            subscriberCount: subscriberCount || 0,
+            thumbnail: `https://via.placeholder.com/120?text=${channelHandle}`
         };
     } catch (error) {
         console.error(`Error fetching data for ${youtuber.name}:`, error);
-        return null;
+        return {
+            name: youtuber.name,
+            url: youtuber.url,
+            subscriberCount: 0,
+            thumbnail: `https://via.placeholder.com/120?text=${youtuber.name}`
+        };
     }
 }
 
@@ -58,7 +91,7 @@ async function fetchAllYouTubers() {
     dashboard.innerHTML = '<div class="loading"><div class="spinner"></div><p>Loading YouTube channels...</p></div>';
     
     try {
-        const promises = youtubers.map(youtuber => getYouTubeChannelData(youtuber));
+        const promises = youtubers.map(youtuber => fetchYouTubeData(youtuber));
         let data = await Promise.all(promises);
         
         // Filter out null entries
@@ -91,7 +124,7 @@ function renderDashboard(data) {
             <h2 class="channel-name">${youtuber.name}</h2>
             <div class="subscriber-count">${formatNumber(youtuber.subscriberCount)}</div>
             <p class="subscriber-label">Subscribers</p>
-            <a href="${youtuber.url}" target="_blank" class="channel-link">Visit Channel</a>
+            <a href="${youtuber.url}" target="_blank" class="channel-link">Visit Channel →</a>
         `;
         dashboard.appendChild(card);
     });
@@ -119,7 +152,7 @@ setInterval(() => {
     fetchAllYouTubers();
 }, 60000); // 60 seconds
 
-// Optional: Manual refresh on button click (you can add a button to HTML)
+// Optional: Manual refresh
 window.manualRefresh = () => {
     console.log('Manual refresh triggered');
     fetchAllYouTubers();
