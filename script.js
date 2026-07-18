@@ -1,12 +1,12 @@
 const youtubers = [
-    { name: 'XREALM', url: 'https://www.youtube.com/@XREALM', profileImg: 'IMG_5499.jpg' },
-    { name: 'MultiC12', url: 'https://www.youtube.com/@MultiC12', profileImg: 'IMG_5500.jpg' },
-    { name: 'JBTHECRAFTER', url: 'https://www.youtube.com/@JBTHECRAFTER', profileImg: 'IMG_5501.jpg' },
-    { name: 'ItzStrawberry', url: 'https://www.youtube.com/@ItzStrawberry', profileImg: 'IMG_5502.jpg' },
-    { name: 'game1kyt', url: 'https://www.youtube.com/@game1kyt', profileImg: 'IMG_5503.jpg' },
-    { name: 'RishabhProGamingRPG', url: 'https://www.youtube.com/@RishabhProGamingRPG', profileImg: 'IMG_5504.jpg' },
-    { name: 'TimmyLoal', url: 'https://www.youtube.com/@TimmyLoal', profileImg: 'IMG_5505.jpg' },
-    { name: 'Verxsion', url: 'https://www.youtube.com/@Verxsion', profileImg: 'IMG_5506.jpg' }
+    { name: 'Xrealm', url: 'https://www.youtube.com/@XREALM', profileImg: 'IMG_5499.jpeg' },
+    { name: 'MultiC12', url: 'https://www.youtube.com/@MultiC12', profileImg: 'IMG_5500.jpeg' },
+    { name: 'JBthecrafter', url: 'https://www.youtube.com/@JBTHECRAFTER', profileImg: 'IMG_5501.jpeg' },
+    { name: 'ItzStrawberry', url: 'https://www.youtube.com/@ItzStrawberry', profileImg: 'IMG_5502.jpeg' },
+    { name: 'Game1k', url: 'https://www.youtube.com/@game1kyt', profileImg: 'IMG_5503.jpeg' },
+    { name: 'RiashboGamingProRPG', url: 'https://www.youtube.com/@RishabhProGamingRPG', profileImg: 'IMG_5504.jpeg' },
+    { name: 'Timmyloal', url: 'https://www.youtube.com/@TimmyLoal', profileImg: 'IMG_5505.jpeg' },
+    { name: 'Verxsion', url: 'https://www.youtube.com/@Verxsion', profileImg: 'IMG_5506.jpeg' }
 ];
 
 const dashboard = document.getElementById('dashboard');
@@ -66,9 +66,9 @@ async function fetchYouTubeData(youtuber) {
         // Fetch subscriber count
         const subscriberCount = await getSubscriberCount(youtuber.url);
         
-        // Use custom profile image if provided
+        // Use custom profile image if provided (images are in the repo root)
         const thumbnail = youtuber.profileImg 
-            ? `./images/${youtuber.profileImg}` 
+            ? `./${youtuber.profileImg}` 
             : `https://via.placeholder.com/120?text=${channelHandle}`;
         
         return {
@@ -84,7 +84,7 @@ async function fetchYouTubeData(youtuber) {
             url: youtuber.url,
             subscriberCount: 0,
             thumbnail: youtuber.profileImg 
-                ? `./images/${youtuber.profileImg}` 
+                ? `./${youtuber.profileImg}` 
                 : `https://via.placeholder.com/120?text=${youtuber.name}`
         };
     }
