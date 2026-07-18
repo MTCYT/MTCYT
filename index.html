@@ -3,86 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MTCYT - MultiCraft Leaderboard</title>
-    <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #121212; color: #fff; text-align: center; margin: 0; padding: 20px; }
-        h1 { color: #ff0000; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 2px; }
-        p.subtitle { color: #888; margin-bottom: 40px; font-size: 1.1rem; }
-        .grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 25px; max-width: 1200px; margin: 0 auto; }
-        .card { background: #1e1e1e; border: 2px solid #333; border-radius: 12px; padding: 25px 20px; width: 220px; box-shadow: 0 4px 15px rgba(0,0,0,0.6); position: relative; transition: transform 0.2s, border-color 0.2s; }
-        .card:hover { transform: translateY(-5px); border-color: #ff0000; }
-        .rank-badge { position: absolute; top: -12px; left: -12px; background: #ff0000; color: white; font-weight: bold; padding: 6px 14px; border-radius: 20px; font-size: 0.95rem; box-shadow: 0 4px 8px rgba(0,0,0,0.4); }
-        .avatar { width: 110px; height: 110px; border-radius: 50%; border: 3px solid #ff0000; object-fit: cover; margin-top: 10px; background: #2a2a2a; }
-        .name { font-size: 1.25rem; font-weight: bold; margin: 15px 0 5px 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .subs { font-size: 1rem; color: #aaaaaa; font-weight: 500; }
-    </style>
+    <title>Multicraft YouTuber Dashboard</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <div class="container">
+        <header>
+            <h1>🎮 Multicraft YouTuber Dashboard</h1>
+            <p class="subtitle">Top Creators Ranked by Subscriber Count</p>
+            <div class="refresh-info">
+                <span>Auto-refresh: <strong>60 seconds</strong></span>
+                <span id="lastUpdate">Last updated: Just now</span>
+            </div>
+        </header>
 
-    <h1>MTCYT Live Leaderboard</h1>
-    <p class="subtitle">Top 10 MultiCraft YouTubers Ranked Live</p>
-    
-    <div class="grid" id="youtubers-grid">Loading leaderboard standings...</div>
+        <main>
+            <div id="dashboard" class="dashboard">
+                <!-- YouTubers will be loaded here -->
+            </div>
+        </main>
 
-    <script>
-        // 1. INPUT YOUR SECURE GOOGLE CREDENTIAL STRING HERE
-        const API_KEY = 'YOUR_GOOGLE_API_KEY';
-        
-        // 2. ALL 10 HANDLES ARE PLUGGED IN AUTOMATICALLY BELOW
-        const handles = [
-            'XREALM', 'MultiC12', 'JBTHECRAFTER', 'ItzStrawberry', 
-            'game1kyt', 'RishabhProGamingRPG', 'TimmyLoal', 
-            'Verxsion', 'OMG_JanaYT', 'ChillPotatoYT'
-        ];
-        
-        const grid = document.getElementById('youtubers-grid');
+        <footer>
+            <p>Multicraft YouTuber Dashboard | Last updated: <span id="timestamp">--</span></p>
+        </footer>
+    </div>
 
-        async function fetchAllChannels() {
-            let channelDataList = [];
-
-            for (const handle of handles) {
-                try {
-                    const url = `https://googleapis.com{handle}&key=${API_KEY}`;
-                    const response = await fetch(url);
-                    const data = await response.json();
-                    
-                    if (data.items && data.items.length > 0) {
-                        const channel = data.items[0];
-                        channelDataList.push({
-                            name: channel.snippet.title,
-                            imgUrl: channel.snippet.thumbnails.medium.url,
-                            subCount: parseInt(channel.statistics.subscriberCount)
-                        });
-                    }
-                } catch (error) {
-                    console.error("Failed to query handle: " + handle, error);
-                }
-            }
-
-            // 3. AUTOMATICALLY SORTS THE CHANNELS FROM HIGHEST TO LOWEST
-            channelDataList.sort((a, b) => b.subCount - a.subCount);
-
-            if (channelDataList.length === 0) {
-                grid.innerHTML = '<p style="color: #ff3333;">No live statistics found. Please double-check your API key settings.</p>';
-                return;
-            }
-
-            // 4. RENDERS THE BADGES, AVATARS, AND NAMES TO GITHUB PAGES
-            grid.innerHTML = channelDataList.map((channel, index) => `
-                <div class="card">
-                    <div class="rank-badge">#${index + 1}</div>
-                    <img class="avatar" src="${channel.imgUrl}" alt="${channel.name}">
-                    <div class="name">${channel.name}</div>
-                    <div class="subs">${channel.subCount.toLocaleString()} Subscribers</div>
-                </div>
-            `).join('');
-        }
-
-        if (API_KEY === 'YOUR_GOOGLE_API_KEY') {
-            grid.innerHTML = '<p style="color: #ffaa00; font-size: 1.2rem;">Please replace "YOUR_GOOGLE_API_KEY" in the code with your actual API key to load live data!</p>';
-        } else {
-            fetchAllChannels();
-        }
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
