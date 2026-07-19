@@ -17,6 +17,8 @@
     .status { font-size:13px; color:#9fb0d6; }
     .loading { opacity:0.7; font-style:italic; color:#7f9fc5; }
     #lastUpdated { margin-top:12px; color:#9fb0d6; font-size:13px; }
+    .editor-note { margin:12px 0; padding:10px; background:#071733; border:1px solid rgba(255,255,255,0.02); font-size:13px; color:#a9c2e6; }
+    pre.json-edit { background:#001028; color:#dbeeff; padding:10px; border-radius:6px; overflow:auto; font-size:13px; }
     @media (max-width:640px) {
       th, td { padding:10px 6px; }
     }
@@ -25,6 +27,29 @@
 <body>
   <h1>Multicraft YouTuber Sub-count Leaderboard</h1>
   <div class="note">Auto-refresh every 60s. Using hardcoded subscriber counts for reliability.</div>
+
+  <!--
+    EASY EDIT SPOT
+    Edit the JSON below to change subscriber counts. Update the "subs" values and save the file.
+    Keep the object shape: { "name": "ChannelName", "url": "https://www.youtube.com/@Handle", "subs": 12345 }
+  -->
+  <div class="editor-note">Edit subscriber counts here (JSON). Change the "subs" values, then save this HTML file on GitHub to update the leaderboard.</div>
+
+  <script id="channels-data" type="application/json">
+  [
+    { "name": "XREALM", "url": "https://www.youtube.com/@XREALM", "subs": 22400 },
+    { "name": "MultiC12", "url": "https://www.youtube.com/@MultiC12", "subs": 0 },
+    { "name": "JBTheCrafter", "url": "https://www.youtube.com/@JBTHECRAFTER", "subs": 0 },
+    { "name": "ItzStrawberry", "url": "https://www.youtube.com/@ItzStrawberry", "subs": 0 },
+    { "name": "game1kyt", "url": "https://www.youtube.com/@game1kyt", "subs": 0 },
+    { "name": "RishabhProGamingRPG", "url": "https://www.youtube.com/@RishabhProGamingRPG", "subs": 0 },
+    { "name": "TimmyLoal", "url": "https://www.youtube.com/@TimmyLoal", "subs": 0 },
+    { "name": "Verxsion", "url": "https://www.youtube.com/@Verxsion", "subs": 0 },
+    { "name": "ChillPotatoYT", "url": "https://www.youtube.com/@ChillPotatoYT", "subs": 0 },
+    { "name": "x9jm", "url": "https://www.youtube.com/@x9jm", "subs": 0 },
+    { "name": "vorthexisyt", "url": "https://www.youtube.com/@vorthexisyt", "subs": 0 }
+  ]
+  </script>
 
   <table id="leaderboard" aria-live="polite">
     <thead>
@@ -42,20 +67,15 @@
   <div id="lastUpdated" aria-hidden="false"></div>
 
 <script>
-/* Channels to track */
-const channels = [
-  { name: 'XREALM', url: 'https://www.youtube.com/@XREALM', subs: 22400 },
-  { name: 'MultiC12', url: 'https://www.youtube.com/@MultiC12', subs: 0 },
-  { name: 'JBTheCrafter', url: 'https://www.youtube.com/@JBTHECRAFTER', subs: 0 },
-  { name: 'ItzStrawberry', url: 'https://www.youtube.com/@ItzStrawberry', subs: 0 },
-  { name: 'game1kyt', url: 'https://www.youtube.com/@game1kyt', subs: 0 },
-  { name: 'RishabhProGamingRPG', url: 'https://www.youtube.com/@RishabhProGamingRPG', subs: 0 },
-  { name: 'TimmyLoal', url: 'https://www.youtube.com/@TimmyLoal', subs: 0 },
-  { name: 'Verxsion', url: 'https://www.youtube.com/@Verxsion', subs: 0 },
-  { name: 'ChillPotatoYT', url: 'https://www.youtube.com/@ChillPotatoYT', subs: 0 },
-  { name: 'x9jm', url: 'https://www.youtube.com/@x9jm', subs: 0 },
-  { name: 'vorthexisyt', url: 'https://www.youtube.com/@vorthexisyt', subs: 0 }
-];
+/* Channels to track — now loaded from the editable JSON block above */
+let channels = [];
+try {
+  const raw = document.getElementById('channels-data').textContent;
+  channels = JSON.parse(raw);
+} catch (e) {
+  console.error('Failed to parse channels-data JSON:', e);
+  channels = [];
+}
 
 /* Helper: convert strings like "1.23M" "12.3K" "12,345" to numeric */
 function parseCountString(s) {
@@ -86,7 +106,7 @@ function renderTable(rows) {
     tr.innerHTML = `
       <td>${idx+1}</td>
       <td><a href="${r.url}" target="_blank" rel="noopener noreferrer" style="color:inherit;text-decoration:none;">${r.name}</a></td>
-      <td class="small muted">${r.handle || ''}</td>
+      <td class="small muted">${(r.url.split('/').pop()||'')}</td>
       <td class="small"><span class="count">${r.display || '—'}</span></td>
       <td class="small status">${r.status || ''}</td>
     `;
@@ -94,17 +114,18 @@ function renderTable(rows) {
   });
 }
 
-/* Main refresh logic: fetch all counts, sort, render */
-async function refreshAll() {
+/* Main refresh logic: use the subs from the channels array, format and render */
+function refreshAll() {
   const start = Date.now();
   const results = channels.map(ch => {
+    const subsNum = (typeof ch.subs === 'number') ? ch.subs : parseCountString(ch.subs);
     const out = { 
       name: ch.name, 
       url: ch.url, 
-      display: formatCompact(ch.subs), 
+      display: formatCompact(subsNum), 
       handle: (ch.url.split('/').pop()||''), 
       status: 'ok',
-      value: ch.subs
+      value: subsNum
     };
     return out;
   });
