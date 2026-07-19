@@ -15,7 +15,7 @@ const youtubers = [
     { name: 'x9jm', url: 'https://www.youtube.com/@x9jm', profileImg: 'IMG_5508.jpeg', subs: 458 },
     { name: 'vorthexisyt', url: 'https://www.youtube.com/@vorthexisyt', profileImg: 'IMG_5509.jpeg', subs: 358 },
     { name: 'Husky_Multicraft', url: 'https://www.youtube.com/@Husky_Multicraft', profileImg: 'IMG_5514.jpeg', subs: 207 },
-  { name: 'System117gaming', url: 'https://www.youtube.com/@system1117gaming', profileImg: 'IMG_5512.jpeg', subs: 115 },
+    { name: 'System117gaming', url: 'https://www.youtube.com/@system1117gaming', profileImg: 'IMG_5512.jpeg', subs: 115 },
 ];
 
 const dashboard = document.getElementById('dashboard');
