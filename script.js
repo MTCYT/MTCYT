@@ -4,13 +4,13 @@
 // ========================================
 const youtubers = [
     { name: 'Xrealm', url: 'https://www.youtube.com/@XREALM', profileImg: 'IMG_5499.jpeg', subs: 22400 },
-    { name: 'MultiC12', url: 'https://www.youtube.com/@MultiC12', profileImg: 'IMG_5500.jpeg', subs: 0 },
-    { name: 'JBthecrafter', url: 'https://www.youtube.com/@JBTHECRAFTER', profileImg: 'IMG_5501.jpeg', subs: 0 },
-    { name: 'ItzStrawberry', url: 'https://www.youtube.com/@ItzStrawberry', profileImg: 'IMG_5502.jpeg', subs: 0 },
-    { name: 'Game1k', url: 'https://www.youtube.com/@game1kyt', profileImg: 'IMG_5503.jpeg', subs: 0 },
-    { name: 'RiashboGamingProRPG', url: 'https://www.youtube.com/@RishabhProGamingRPG', profileImg: 'IMG_5504.jpeg', subs: 0 },
-    { name: 'Timmyloal', url: 'https://www.youtube.com/@TimmyLoal', profileImg: 'IMG_5505.jpeg', subs: 0 },
-    { name: 'Verxsion', url: 'https://www.youtube.com/@Verxsion', profileImg: 'IMG_5506.jpeg', subs: 0 }
+    { name: 'MultiC12', url: 'https://www.youtube.com/@MultiC12', profileImg: 'IMG_5500.jpeg', subs: 12200 },
+    { name: 'JBthecrafter', url: 'https://www.youtube.com/@JBTHECRAFTER', profileImg: 'IMG_5501.jpeg', subs: 9820 },
+    { name: 'ItzStrawberry', url: 'https://www.youtube.com/@ItzStrawberry', profileImg: 'IMG_5502.jpeg', subs: 3050 },
+    { name: 'Game1k', url: 'https://www.youtube.com/@game1kyt', profileImg: 'IMG_5503.jpeg', subs: 2560 },
+    { name: 'RiashboGamingProRPG', url: 'https://www.youtube.com/@RishabhProGamingRPG', profileImg: 'IMG_5504.jpeg', subs: 2380 },
+    { name: 'Timmyloal', url: 'https://www.youtube.com/@TimmyLoal', profileImg: 'IMG_5505.jpeg', subs: 1690 },
+    { name: 'Verxsion', url: 'https://www.youtube.com/@Verxsion', profileImg: 'IMG_5506.jpeg', subs: 1520 }
 ];
 
 const dashboard = document.getElementById('dashboard');
