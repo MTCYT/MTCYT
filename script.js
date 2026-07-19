@@ -17,6 +17,7 @@ const youtubers = [
 const dashboard = document.getElementById('dashboard');
 const lastUpdateSpan = document.getElementById('lastUpdate');
 const timestampSpan = document.getElementById('timestamp');
+let isLoading = false;
 
 // Format large numbers
 function formatNumber(num) {
@@ -47,23 +48,38 @@ function renderDashboard(data) {
     });
 }
 
+// Show loading spinner briefly
+function showLoadingSpinner() {
+    dashboard.innerHTML = '<div class="loading"><div class="spinner"></div><p>Loading YouTube channels...</p></div>';
+}
+
 // Load and display YouTube data
 function loadYouTubers() {
-    dashboard.innerHTML = '<div class="loading"><div class="spinner"></div><p>Loading YouTube channels...</p></div>';
+    if (isLoading) return;
     
-    try {
-        // Sort by subscriber count (highest first)
-        const sortedData = [...youtubers].sort((a, b) => b.subs - a.subs);
-        
-        // Render the dashboard
-        renderDashboard(sortedData);
-        
-        // Update timestamp
-        updateTimestamp();
-    } catch (error) {
-        console.error('Error loading YouTube data:', error);
-        dashboard.innerHTML = '<p class="loading" style="color: #ff6666;">Error loading channel data. Please try again later.</p>';
-    }
+    isLoading = true;
+    
+    // Show spinner for visual feedback
+    showLoadingSpinner();
+    
+    // Use setTimeout with 300ms delay to show spinner briefly, then load instantly
+    setTimeout(() => {
+        try {
+            // Sort by subscriber count (highest first)
+            const sortedData = [...youtubers].sort((a, b) => b.subs - a.subs);
+            
+            // Render the dashboard
+            renderDashboard(sortedData);
+            
+            // Update timestamp
+            updateTimestamp();
+        } catch (error) {
+            console.error('Error loading YouTube data:', error);
+            dashboard.innerHTML = '<p class="loading" style="color: #ff6666;">Error loading channel data. Please try again later.</p>';
+        } finally {
+            isLoading = false;
+        }
+    }, 300); // Brief 300ms delay to show the spinner
 }
 
 // Update timestamp
@@ -82,11 +98,11 @@ function updateTimestamp() {
 // Initial load
 loadYouTubers();
 
-// Set up auto-refresh every 60 seconds
+// Set up auto-refresh every 30 seconds (faster than before)
 setInterval(() => {
     console.log('Auto-refreshing dashboard...');
     loadYouTubers();
-}, 60000); // 60 seconds
+}, 30000); // 30 seconds
 
 // Optional: Manual refresh
 window.manualRefresh = () => {
