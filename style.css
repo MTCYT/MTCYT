@@ -179,26 +179,28 @@ header h1 {
 
 .loading {
     text-align: center;
-    padding: 60px 40px;
-    font-size: 1.2em;
+    padding: 40px 20px;
+    font-size: 1.05em;
     color: var(--text-secondary);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 20px;
+    gap: 14px;
+    min-height: 140px; /* ensures spinner has space to show */
 }
 
 .spinner {
     display: inline-block;
-    width: 50px;
-    height: 50px;
-    border: 5px solid rgba(255, 0, 0, 0.2);
+    width: 46px;
+    height: 46px;
+    border: 5px solid rgba(255, 0, 0, 0.18);
     border-top: 5px solid var(--primary-color);
     border-right: 5px solid var(--accent);
     border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-    box-shadow: 0 0 20px rgba(255, 0, 0, 0.3);
+    animation: spin 0.65s linear infinite; /* slightly faster rotation */
+    box-shadow: 0 0 18px rgba(255, 0, 0, 0.3);
+    will-change: transform; /* hint to browser */
 }
 
 @keyframes spin {
