@@ -10,13 +10,13 @@ if (!apiKey) {
 
 // Your channel IDs - Replace these with actual YouTube Channel IDs
 const channels = [
-   { name: 'Xrealm', id: 'UCFQd2yZnvq-iJI7wz9jC2YA', img: 'IMG_5499.jpeg', url: 'https://www.youtube.com/@XREALM' },
+    { name: 'Xrealm', id: 'UCFQd2yZnvq-iJI7wz9jC2YA', img: 'IMG_5499.jpeg', url: 'https://www.youtube.com/@XREALM' },
     { name: 'MultiC12', id: 'UCdCp7TeckzYLlAlxx2AgZlw', img: 'IMG_5500.jpeg', url: 'https://www.youtube.com/@MultiC12' },
     { name: 'JBthecrafter', id: 'UC9u62wcOxIGTFDT8cXGN3_A', img: 'IMG_5501.jpeg', url: 'https://www.youtube.com/@JBTHECRAFTER' },
     { name: 'ItzStrawberry', id: 'UCPretZF6SLAIMIalsOQhBTg', img: 'IMG_5502.jpeg', url: 'https://www.youtube.com/@ItzStrawberry' },
     { name: 'Game1k', id: 'UCIiTOQP44lgYA6duuZnALfg', img: 'IMG_5503.jpeg', url: 'https://www.youtube.com/@game1kyt' },
     { name: 'RiashboGamingProRPG', id: 'UC2mgwdmctt2VW5c1HEqAQdw', img: 'IMG_5504.jpeg', url: 'https://www.youtube.com/@RishabhProGamingRPG' },
-    { name: 'Timmyloal', id: 'UCMpMpC01eQv7rUrIyZzkwnQ', img: 'IMG_5505.jpeg', url: 'https://www.youtube.com/@TimmyLoal' },
+    { name: 'Timmyloal', id: 'UCMpMpC01eQv7rUrIyZskwnQ', img: 'IMG_5505.jpeg', url: 'https://www.youtube.com/@TimmyLoal' },
     { name: 'Verxsion', id: 'UC6JRGA_JV4bKPgh8lHCdFWA', img: 'IMG_5506.jpeg', url: 'https://www.youtube.com/@Verxsion' },
     { name: 'ChillPotatoYT', id: 'UCzIHUnv6WfPuqINZDx0aUJg', img: 'IMG_5507.jpeg', url: 'https://www.youtube.com/@ChillPotatoYT' },
     { name: 'x9jm', id: 'UCsXf8ka3i023SLn0y97unbw', img: 'IMG_5508.jpeg', url: 'https://www.youtube.com/@x9jm' },
@@ -25,7 +25,6 @@ const channels = [
     { name: 'Husky_Multicraft', id: 'UCaafcsvM-r7rYimABYgjz3w', img: 'IMG_5514.jpeg', url: 'https://www.youtube.com/@Husky_Multicraft' },
     { name: 'System117gaming', id: 'UC4JBWjxKcgkvdWY4hAKyqGg', img: 'IMG_5512.jpeg', url: 'https://www.youtube.com/@system1117gaming' },
     { name: 'Prologozrock', id: 'UCcbGvVytWN3_rLOWt1qLx_w', img: 'IMG_5517.jpeg', url: 'https://www.youtube.com/@Prologozrock' },
-];
 ];
 
 async function getSubscriberCount(channelId) {
@@ -66,6 +65,11 @@ async function updateSubscribers() {
         }
     }
     
+    if (youtubers.length === 0) {
+        console.error('Fatal error: No subscriber data was fetched. Check your API key and channel IDs.');
+        process.exit(1);
+    }
+    
     // Read existing script.js to preserve other content
     const existingScript = fs.readFileSync('script.js', 'utf8');
     
@@ -77,7 +81,7 @@ async function updateSubscribers() {
     
     // Write updated script.js
     fs.writeFileSync('script.js', updatedScript);
-    console.log('✓ Updated script.js with latest subscriber counts');
+    console.log(`✓ Updated script.js with ${youtubers.length} channels (latest subscriber counts)`);
 }
 
 updateSubscribers().catch(err => {
