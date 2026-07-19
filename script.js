@@ -1,6 +1,6 @@
 // ========================================
 // LIVE SUBSCRIBER COUNTS
-// Auto-updated by GitHub Actions every 30 minutes
+// Auto-updated every minute via GitHub Actions
 // ========================================
 const youtubers = [];
 
@@ -24,7 +24,7 @@ function renderDashboard(data) {
     dashboard.innerHTML = '';
     
     if (data.length === 0) {
-        dashboard.innerHTML = '<p class="loading" style="color: #ff6666;">No subscriber data available. Please check back soon.</p>';
+        dashboard.innerHTML = '<p class="loading" style="color: #ff6666;">No subscriber data available. Waiting for first data fetch...</p>';
         return;
     }
     
@@ -93,11 +93,11 @@ function updateTimestamp() {
 // Initial load
 loadYouTubers();
 
-// Set up auto-refresh every 30 seconds (faster than before)
+// Set up auto-refresh every 60 seconds (one minute)
 setInterval(() => {
-    console.log('Auto-refreshing dashboard...');
+    console.log('Auto-refreshing dashboard every minute...');
     loadYouTubers();
-}, 30000); // 30 seconds
+}, 60000); // 60 seconds (one minute)
 
 // Optional: Manual refresh
 window.manualRefresh = () => {
