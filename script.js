@@ -11,8 +11,9 @@ const youtubers = [
     { name: 'RiashboGamingProRPG', url: 'https://www.youtube.com/@RishabhProGamingRPG', profileImg: 'IMG_5504.jpeg', subs: 2380 },
     { name: 'Timmyloal', url: 'https://www.youtube.com/@TimmyLoal', profileImg: 'IMG_5505.jpeg', subs: 1690 },
     { name: 'Verxsion', url: 'https://www.youtube.com/@Verxsion', profileImg: 'IMG_5506.jpeg', subs: 1520 },
-    { name: 'ChillPotatoYT', url: 'https://www.youtube.com/@ChillPotatoYT', profileImg: 'IMG_5507.jpeg', subs: 561 }
-];  { name: 'x9jm', url: 'https://www.youtube.com/@x9jm', profileImg: 'IMG_5508.jpeg', subs: 458 }
+    { name: 'ChillPotatoYT', url: 'https://www.youtube.com/@ChillPotatoYT', profileImg: 'IMG_5507.jpeg', subs: 561 },
+    { name: 'x9jm', url: 'https://www.youtube.com/@x9jm', profileImg: 'IMG_5508.jpeg', subs: 458 }
+];
 
 const dashboard = document.getElementById('dashboard');
 const lastUpdateSpan = document.getElementById('lastUpdate');
