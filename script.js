@@ -17,6 +17,7 @@ const youtubers = [
     { name: 'sxmples', url: 'https://www.youtube.com/@sxmpleMTC', profileImg: 'IMG_5516.jpeg', subs: 227 },
     { name: 'Husky_Multicraft', url: 'https://www.youtube.com/@Husky_Multicraft', profileImg: 'IMG_5514.jpeg', subs: 207 },
     { name: 'System117gaming', url: 'https://www.youtube.com/@system1117gaming', profileImg: 'IMG_5512.jpeg', subs: 115 },
+    { name: 'Prologozrock', url: 'https://www.youtube.com/@Prologozrock', profileImg: 'IMG_5517.jpeg', subs: 75 },
 ];
 
 const dashboard = document.getElementById('dashboard');
