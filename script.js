@@ -14,7 +14,7 @@ const youtubers = [
     { name: 'ChillPotatoYT', url: 'https://www.youtube.com/@ChillPotatoYT', profileImg: 'IMG_5507.jpeg', subs: 561 },
     { name: 'x9jm', url: 'https://www.youtube.com/@x9jm', profileImg: 'IMG_5508.jpeg', subs: 458 },
     { name: 'vorthexisyt', url: 'https://www.youtube.com/@vorthexisyt', profileImg: 'IMG_5509.jpeg', subs: 358 },
-    { name: 'sxmples', url: 'https://www.youtube.com/@sxmpleMTC', profileImg: 'IMG_5515.jpeg', subs: 227 },
+    { name: 'sxmples', url: 'https://www.youtube.com/@sxmpleMTC', profileImg: 'IMG_5516.jpeg', subs: 227 },
     { name: 'Husky_Multicraft', url: 'https://www.youtube.com/@Husky_Multicraft', profileImg: 'IMG_5514.jpeg', subs: 207 },
     { name: 'System117gaming', url: 'https://www.youtube.com/@system1117gaming', profileImg: 'IMG_5512.jpeg', subs: 115 },
 ];
