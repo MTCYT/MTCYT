@@ -1,1 +1,36 @@
+name: Update YouTube Subscriber Counts
 
+on:
+  schedule:
+    # Run every 1 minute
+    - cron: '* * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-subs:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      
+      - name: Run update-subs.js
+        env:
+          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+        run: node update-subs.js
+      
+      - name: Commit and push updates
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add script.js
+          git commit -m "chore: update subscriber counts" || echo "No changes to commit"
+          git push
