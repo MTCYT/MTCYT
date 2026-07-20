@@ -8,7 +8,7 @@ if (!apiKey) {
     process.exit(1);
 }
 
-// Your channel IDs (get from YouTube URLs - the part after @)
+// Your channel IDs - Replace these with actual YouTube Channel IDs
 const channels = [
     { name: 'Xrealm', id: 'UCFQd2yZnvq-iJI7wz9jC2YA', img: 'IMG_5499.jpeg', url: 'https://www.youtube.com/@XREALM' },
     { name: 'MultiC12', id: 'UCdCp7TeckzYLlAlxx2AgZlw', img: 'IMG_5500.jpeg', url: 'https://www.youtube.com/@MultiC12' },
@@ -16,7 +16,7 @@ const channels = [
     { name: 'ItzStrawberry', id: 'UCPretZF6SLAIMIalsOQhBTg', img: 'IMG_5502.jpeg', url: 'https://www.youtube.com/@ItzStrawberry' },
     { name: 'Game1k', id: 'UCIiTOQP44lgYA6duuZnALfg', img: 'IMG_5503.jpeg', url: 'https://www.youtube.com/@game1kyt' },
     { name: 'RiashboGamingProRPG', id: 'UC2mgwdmctt2VW5c1HEqAQdw', img: 'IMG_5504.jpeg', url: 'https://www.youtube.com/@RishabhProGamingRPG' },
-    { name: 'Timmyloal', id: 'UCMpMpC01eQv7rUrIyZzkwnQ', img: 'IMG_5505.jpeg', url: 'https://www.youtube.com/@TimmyLoal' },
+    { name: 'Timmyloal', id: 'UCMpMpC01eQv7rUrIyZskwnQ', img: 'IMG_5505.jpeg', url: 'https://www.youtube.com/@TimmyLoal' },
     { name: 'Verxsion', id: 'UC6JRGA_JV4bKPgh8lHCdFWA', img: 'IMG_5506.jpeg', url: 'https://www.youtube.com/@Verxsion' },
     { name: 'ChillPotatoYT', id: 'UCzIHUnv6WfPuqINZDx0aUJg', img: 'IMG_5507.jpeg', url: 'https://www.youtube.com/@ChillPotatoYT' },
     { name: 'x9jm', id: 'UCsXf8ka3i023SLn0y97unbw', img: 'IMG_5508.jpeg', url: 'https://www.youtube.com/@x9jm' },
@@ -58,11 +58,17 @@ async function updateSubscribers() {
     for (const channel of channels) {
         try {
             const subs = await getSubscriberCount(channel.id);
-            youtubers.push({ ...channel, subs });
+            // include profileImg so the front-end can reference it consistently
+            youtubers.push({ ...channel, profileImg: channel.img, subs });
             console.log(`✓ ${channel.name}: ${subs.toLocaleString()} subscribers`);
         } catch (err) {
             console.error(`✗ Failed to fetch ${channel.name}:`, err.message);
         }
+    }
+    
+    if (youtubers.length === 0) {
+        console.error('Fatal error: No subscriber data was fetched. Check your API key and channel IDs.');
+        process.exit(1);
     }
     
     // Read existing script.js to preserve other content
@@ -76,7 +82,7 @@ async function updateSubscribers() {
     
     // Write updated script.js
     fs.writeFileSync('script.js', updatedScript);
-    console.log('✓ Updated script.js with latest subscriber counts');
+    console.log(`✓ Updated script.js with ${youtubers.length} channels (latest subscriber counts)`);
 }
 
 updateSubscribers().catch(err => {
