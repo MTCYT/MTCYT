@@ -31,9 +31,12 @@ function renderDashboard(data) {
     data.forEach((youtuber, index) => {
         const card = document.createElement('div');
         card.className = 'youtuber-card';
+        // Use profileImg if present, otherwise fall back to img, otherwise a placeholder with the channel name
+        const imgSrc = youtuber.profileImg || youtuber.img || (`https://via.placeholder.com/120?text=${encodeURIComponent(youtuber.name)}`);
+        const onErrorSrc = `https://via.placeholder.com/120?text=${encodeURIComponent(youtuber.name)}`;
         card.innerHTML = `
             <div class="rank-badge">#${index + 1}</div>
-            <img src="${youtuber.profileImg}" alt="${youtuber.name}" class="profile-img" onerror="this.src='https://via.placeholder.com/120?text=${youtuber.name}'">
+            <img src="${imgSrc}" alt="${youtuber.name}" class="profile-img" onerror="this.src='${onErrorSrc}'">
             <h2 class="channel-name">${youtuber.name}</h2>
             <div class="subscriber-count">${formatNumber(youtuber.subs)}</div>
             <p class="subscriber-label">Subscribers</p>
