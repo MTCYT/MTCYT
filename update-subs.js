@@ -58,7 +58,8 @@ async function updateSubscribers() {
     for (const channel of channels) {
         try {
             const subs = await getSubscriberCount(channel.id);
-            youtubers.push({ ...channel, subs });
+            // include profileImg so the front-end can reference it consistently
+            youtubers.push({ ...channel, profileImg: channel.img, subs });
             console.log(`✓ ${channel.name}: ${subs.toLocaleString()} subscribers`);
         } catch (err) {
             console.error(`✗ Failed to fetch ${channel.name}:`, err.message);
