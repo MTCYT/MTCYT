@@ -27,34 +27,51 @@ const channels = [
     { name: 'Prologozrock', id: 'UCcbGvVytWN3_rLOWt1qLx_w', img: 'IMG_5517.jpeg', url: 'https://www.youtube.com/@Prologozrock' },
 ];
 
+// Improved getSubscriberCount with verbose logging for debugging
 async function getSubscriberCount(channelId) {
     return new Promise((resolve, reject) => {
         const url = `https://www.googleapis.com/youtube/v3/channels?part=statistics&id=${channelId}&key=${apiKey}`;
-        
+
         https.get(url, (res) => {
             let data = '';
             res.on('data', chunk => data += chunk);
             res.on('end', () => {
                 try {
                     const json = JSON.parse(data);
+
+                    // If the API returns an error object, surface it
+                    if (json.error) {
+                        // Print the whole error object so logs show the reason (e.g., API key invalid, quota, etc.)
+                        console.error(`YouTube API error for channel ${channelId}:`, JSON.stringify(json.error));
+                        reject(new Error(json.error.message || 'YouTube API error'));
+                        return;
+                    }
+
                     if (!json.items || json.items.length === 0) {
+                        // Log the raw response so we can see whether it's empty or contains an unexpected structure
+                        console.error(`YouTube API returned no items for channel ${channelId}. Raw response:`, data);
                         reject(new Error('Channel not found'));
                         return;
                     }
+
                     const subs = parseInt(json.items[0].statistics.subscriberCount);
                     resolve(subs);
                 } catch (e) {
+                    console.error('Failed to parse YouTube API response for', channelId, 'raw response:', data);
                     reject(e);
                 }
             });
-        }).on('error', reject);
+        }).on('error', (err) => {
+            console.error('Network error when calling YouTube API for', channelId, err);
+            reject(err);
+        });
     });
 }
 
 async function updateSubscribers() {
     console.log('Fetching latest subscriber counts from YouTube API...');
     const youtubers = [];
-    
+
     for (const channel of channels) {
         try {
             const subs = await getSubscriberCount(channel.id);
@@ -62,24 +79,24 @@ async function updateSubscribers() {
             youtubers.push({ ...channel, profileImg: channel.img, subs });
             console.log(`✓ ${channel.name}: ${subs.toLocaleString()} subscribers`);
         } catch (err) {
-            console.error(`✗ Failed to fetch ${channel.name}:`, err.message);
+            console.error(`✗ Failed to fetch ${channel.name}:`, err.message || err);
         }
     }
-    
+
     if (youtubers.length === 0) {
         console.error('Fatal error: No subscriber data was fetched. Check your API key and channel IDs.');
         process.exit(1);
     }
-    
+
     // Read existing script.js to preserve other content
     const existingScript = fs.readFileSync('script.js', 'utf8');
-    
+
     // Replace the youtubers array while keeping the rest of the script
     const updatedScript = existingScript.replace(
         /const youtubers = \[\s*[\s\S]*?\];/,
         `const youtubers = ${JSON.stringify(youtubers, null, 4)};`
     );
-    
+
     // Write updated script.js
     fs.writeFileSync('script.js', updatedScript);
     console.log(`✓ Updated script.js with ${youtubers.length} channels (latest subscriber counts)`);
