@@ -1,0 +1,42 @@
+name: Debug YouTube API Key
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  debug:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Call YouTube Data API for one channel
+        env:
+          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+        run: |
+          set -euo pipefail
+          echo "Starting YouTube API debug run (the secret value is masked in logs)."
+          CHANNEL_ID="UCFQd2yZnvq-iJI7wz9jC2YA"
+
+          RESPONSE_AND_STATUS=$(curl -s -w "\n%{http_code}" "https://www.googleapis.com/youtube/v3/channels?part=statistics&id=${CHANNEL_ID}&key=${YOUTUBE_API_KEY}")
+          HTTP_STATUS=$(echo "$RESPONSE_AND_STATUS" | tail -n1)
+          HTTP_BODY=$(echo "$RESPONSE_AND_STATUS" | sed '$d')
+
+          echo "HTTP status: $HTTP_STATUS"
+          echo "Response body (raw):"
+          echo "$HTTP_BODY"
+
+          if command -v jq >/dev/null 2>&1; then
+            echo "---- pretty JSON (jq) ----"
+            echo "$HTTP_BODY" | jq '.' || true
+          else
+            echo "---- try python3 json pretty print ----"
+            echo "$HTTP_BODY" | python3 -c 'import sys, json
+try:
+    print(json.dumps(json.load(sys.stdin), indent=2))
+except Exception:
+    print("(not valid JSON)")' || true
+          fi
+
+          echo "---- end of response ----"
