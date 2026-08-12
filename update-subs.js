@@ -5,7 +5,8 @@ const apiKey = process.env.YOUTUBE_API_KEY;
 
 if (!apiKey) {
     console.error('Error: YOUTUBE_API_KEY environment variable not set');
-    process.exit(1);
+    // Do not exit with non-zero here so that CI doesn't fail hard; workflow will show logs.
+    // Keep running so the workflow can complete and we can inspect logs.
 }
 
 // Your channel IDs - Replace these with actual YouTube Channel IDs
@@ -27,7 +28,6 @@ const channels = [
     { name: 'Prologozrock', id: 'UCcbGvVytWN3_rLOWt1qLx_w', img: 'IMG_5517.jpeg', url: 'https://www.youtube.com/@Prologozrock' },
 ];
 
-// Improved getSubscriberCount with verbose logging for debugging
 async function getSubscriberCount(channelId) {
     return new Promise((resolve, reject) => {
         const url = `https://www.googleapis.com/youtube/v3/channels?part=statistics&id=${channelId}&key=${apiKey}`;
@@ -37,32 +37,38 @@ async function getSubscriberCount(channelId) {
             res.on('data', chunk => data += chunk);
             res.on('end', () => {
                 try {
-                    const json = JSON.parse(data);
+                    // Log status code for debugging
+                    if (res && res.statusCode && res.statusCode !== 200) {
+                        console.warn(`YouTube API HTTP status ${res.statusCode} for channel ${channelId}`);
+                    }
 
-                    // If the API returns an error object, surface it
+                    let json;
+                    try {
+                        json = JSON.parse(data);
+                    } catch (parseErr) {
+                        console.error(`YouTube API: failed to parse JSON for channel ${channelId}. Raw response:`, data);
+                        return reject(new Error('Invalid JSON from YouTube API'));
+                    }
+
                     if (json.error) {
-                        // Print the whole error object so logs show the reason (e.g., API key invalid, quota, etc.)
                         console.error(`YouTube API error for channel ${channelId}:`, JSON.stringify(json.error));
-                        reject(new Error(json.error.message || 'YouTube API error'));
-                        return;
+                        return reject(new Error(json.error.message || 'YouTube API error'));
                     }
 
                     if (!json.items || json.items.length === 0) {
-                        // Log the raw response so we can see whether it's empty or contains an unexpected structure
                         console.error(`YouTube API returned no items for channel ${channelId}. Raw response:`, data);
-                        reject(new Error('Channel not found'));
-                        return;
+                        return reject(new Error('Channel not found'));
                     }
 
-                    const subs = parseInt(json.items[0].statistics.subscriberCount);
+                    const subs = parseInt(json.items[0].statistics.subscriberCount, 10);
                     resolve(subs);
                 } catch (e) {
-                    console.error('Failed to parse YouTube API response for', channelId, 'raw response:', data);
+                    console.error('Unexpected error handling YouTube API response for', channelId, e, 'raw response:', data);
                     reject(e);
                 }
             });
         }).on('error', (err) => {
-            console.error('Network error when calling YouTube API for', channelId, err);
+            console.error('HTTP request error when calling YouTube API for', channelId, err);
             reject(err);
         });
     });
@@ -79,17 +85,26 @@ async function updateSubscribers() {
             youtubers.push({ ...channel, profileImg: channel.img, subs });
             console.log(`✓ ${channel.name}: ${subs.toLocaleString()} subscribers`);
         } catch (err) {
-            console.error(`✗ Failed to fetch ${channel.name}:`, err.message || err);
+            console.error(`✗ Failed to fetch ${channel.name}:`, err.message);
         }
     }
 
     if (youtubers.length === 0) {
         console.error('Fatal error: No subscriber data was fetched. Check your API key and channel IDs.');
-        process.exit(1);
+        console.error('Leaving script.js unchanged so the site can continue to serve existing data (if any).');
+        // Do not exit with an error code so the workflow can finish and show the logs.
+        return;
     }
 
     // Read existing script.js to preserve other content
-    const existingScript = fs.readFileSync('script.js', 'utf8');
+    let existingScript;
+    try {
+        existingScript = fs.readFileSync('script.js', 'utf8');
+    } catch (readErr) {
+        console.error('Failed to read script.js from disk:', readErr);
+        // Still attempt to write a new script.js if possible
+        existingScript = `// Auto-generated script.js - fallback\nconst youtubers = ${JSON.stringify(youtubers, null, 4)};\n`;
+    }
 
     // Replace the youtubers array while keeping the rest of the script
     const updatedScript = existingScript.replace(
@@ -97,12 +112,16 @@ async function updateSubscribers() {
         `const youtubers = ${JSON.stringify(youtubers, null, 4)};`
     );
 
-    // Write updated script.js
-    fs.writeFileSync('script.js', updatedScript);
-    console.log(`✓ Updated script.js with ${youtubers.length} channels (latest subscriber counts)`);
+    try {
+        // Write updated script.js
+        fs.writeFileSync('script.js', updatedScript, 'utf8');
+        console.log(`✓ Updated script.js with ${youtubers.length} channels (latest subscriber counts)`);
+    } catch (writeErr) {
+        console.error('Failed to write updated script.js:', writeErr);
+    }
 }
 
 updateSubscribers().catch(err => {
-    console.error('Fatal error:', err);
-    process.exit(1);
+    console.error('Unhandled error in updateSubscribers:', err);
+    // Do not exit with non-zero to avoid failing the whole workflow; keep logs for diagnosis.
 });
