@@ -2,7 +2,16 @@
 // LIVE SUBSCRIBER COUNTS
 // Auto-updated every minute via GitHub Actions
 // ========================================
-const youtubers = [];
+const youtubers = [
+    {
+        "name": "MultiC12",
+        "id": "UCdCp7TeckzYLlAlxx2AgZlw",
+        "img": "IMG_5500.jpeg",
+        "url": "https://www.youtube.com/@MultiC12",
+        "profileImg": "IMG_5500.jpeg",
+        "subs": 12200
+    }
+];
 
 const dashboard = document.getElementById('dashboard');
 const lastUpdateSpan = document.getElementById('lastUpdate');
