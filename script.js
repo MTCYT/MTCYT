@@ -1,6 +1,6 @@
 // ========================================
 // LIVE SUBSCRIBER COUNTS
-// Auto-updated every minute via GitHub Actions
+// Fetching from Livecounts.io API
 // ========================================
 const youtubers = [
     {
@@ -9,7 +9,7 @@ const youtubers = [
         "img": "IMG_5500.jpeg",
         "url": "https://www.youtube.com/@MultiC12",
         "profileImg": "IMG_5500.jpeg",
-        "subs": 12200
+        "subs": 0
     },
     {
         "name": "Game1k",
@@ -20,19 +20,19 @@ const youtubers = [
         "subs": 0
     },
     {
-        "name": "Xrealm",
-        "id": "UCFQd2yZnvq-iJI7wz9jC2YA",
-        "img": "IMG_5499.jpeg",
-        "url": "https://www.youtube.com/@XREALM",
-        "profileImg": "IMG_5499.jpeg",
-        "subs": 0
-    },
-    {
         "name": "ItzStrawberry",
         "id": "UCPretZF6SLAIMIalsOQhBTg",
         "img": "IMG_5502.jpeg",
         "url": "https://www.youtube.com/@ItzStrawberry",
         "profileImg": "IMG_5502.jpeg",
+        "subs": 0
+    },
+    {
+        "name": "Xrealm",
+        "id": "UCFQd2yZnvq-iJI7wz9jC2YA",
+        "img": "IMG_5499.jpeg",
+        "url": "https://www.youtube.com/@XREALM",
+        "profileImg": "IMG_5499.jpeg",
         "subs": 0
     }
 ];
@@ -50,6 +50,22 @@ function formatNumber(num) {
         return (num / 1000).toFixed(2) + 'K';
     }
     return num.toString();
+}
+
+// Fetch subscriber count from Livecounts.io API
+async function getSubscriberCount(channelId) {
+    try {
+        const response = await fetch(`https://www.livecounts.io/youtube-api/subscriber_count/${channelId}`);
+        if (!response.ok) {
+            console.warn(`Failed to fetch subscribers for ${channelId}: ${response.status}`);
+            return null;
+        }
+        const data = await response.json();
+        return data.subscriber_count || null;
+    } catch (error) {
+        console.error(`Error fetching subscriber count for ${channelId}:`, error);
+        return null;
+    }
 }
 
 // Render dashboard with YouTubers using live subscriber data
@@ -85,7 +101,7 @@ function showLoadingSpinner() {
 }
 
 // Load and display YouTube data
-function loadYouTubers() {
+async function loadYouTubers() {
     if (isLoading) return;
     
     isLoading = true;
@@ -93,24 +109,32 @@ function loadYouTubers() {
     // Show spinner for visual feedback
     showLoadingSpinner();
     
-    // Use setTimeout with 300ms delay to show spinner briefly, then load instantly
-    setTimeout(() => {
-        try {
-            // Sort by subscriber count (highest first)
-            const sortedData = [...youtubers].sort((a, b) => b.subs - a.subs);
-            
-            // Render the dashboard
-            renderDashboard(sortedData);
-            
-            // Update timestamp
-            updateTimestamp();
-        } catch (error) {
-            console.error('Error loading YouTube data:', error);
-            dashboard.innerHTML = '<p class="loading" style="color: #ff6666;">Error loading channel data. Please try again later.</p>';
-        } finally {
-            isLoading = false;
-        }
-    }, 300); // Brief 300ms delay to show the spinner
+    try {
+        // Fetch subscriber counts for all channels
+        const updatedYoutubers = await Promise.all(
+            youtubers.map(async (youtuber) => {
+                const subs = await getSubscriberCount(youtuber.id);
+                return {
+                    ...youtuber,
+                    subs: subs || youtuber.subs // Use fetched count or keep existing
+                };
+            })
+        );
+        
+        // Sort by subscriber count (highest first)
+        const sortedData = updatedYoutubers.sort((a, b) => b.subs - a.subs);
+        
+        // Render the dashboard
+        renderDashboard(sortedData);
+        
+        // Update timestamp
+        updateTimestamp();
+    } catch (error) {
+        console.error('Error loading YouTube data:', error);
+        dashboard.innerHTML = '<p class="loading" style="color: #ff6666;">Error loading channel data. Please try again later.</p>';
+    } finally {
+        isLoading = false;
+    }
 }
 
 // Update timestamp
@@ -131,7 +155,7 @@ loadYouTubers();
 
 // Set up auto-refresh every 60 seconds (one minute)
 setInterval(() => {
-    console.log('Auto-refreshing dashboard every minute...');
+    console.log('Auto-refreshing dashboard from Livecounts.io...');
     loadYouTubers();
 }, 60000); // 60 seconds (one minute)
 
