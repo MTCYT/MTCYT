@@ -1,6 +1,6 @@
 // ========================================
 // LIVE SUBSCRIBER COUNTS
-// Fetching from Livecounts.io API
+// Fetching from YouTube Data API via Alternative Method
 // ========================================
 const youtubers = [
     {
@@ -52,16 +52,25 @@ function formatNumber(num) {
     return num.toString();
 }
 
-// Fetch subscriber count from Livecounts.io API
+// Fetch subscriber count from YouTube via yT-API
 async function getSubscriberCount(channelId) {
     try {
-        const response = await fetch(`https://www.livecounts.io/youtube-api/subscriber_count/${channelId}`);
+        const response = await fetch(`https://yt-api.p.rapidapi.com/channel/about?id=${channelId}`, {
+            method: 'GET',
+            headers: {
+                'x-rapidapi-key': 'a5f87e3a70msh1a8f5c8f2f8f2f8f2f8',
+                'x-rapidapi-host': 'yt-api.p.rapidapi.com'
+            }
+        });
+        
         if (!response.ok) {
             console.warn(`Failed to fetch subscribers for ${channelId}: ${response.status}`);
             return null;
         }
+        
         const data = await response.json();
-        return data.subscriber_count || null;
+        const subsStr = data.stats?.subscribers?.replace(/[^0-9]/g, '');
+        return subsStr ? parseInt(subsStr, 10) : null;
     } catch (error) {
         console.error(`Error fetching subscriber count for ${channelId}:`, error);
         return null;
@@ -97,7 +106,7 @@ function renderDashboard(data) {
 
 // Show loading spinner briefly
 function showLoadingSpinner() {
-    dashboard.innerHTML = '<div class="loading"><div class="spinner"></div><p>Loading YouTube channels...</p></div>';
+    dashboard.innerHTML = '<div class="loading"><div class="spinner"></div><p>Loading Multicraft Channels...</p></div>';
 }
 
 // Load and display YouTube data
@@ -155,7 +164,7 @@ loadYouTubers();
 
 // Set up auto-refresh every 60 seconds (one minute)
 setInterval(() => {
-    console.log('Auto-refreshing dashboard from Livecounts.io...');
+    console.log('Auto-refreshing Multicraft Channels...');
     loadYouTubers();
 }, 60000); // 60 seconds (one minute)
 
