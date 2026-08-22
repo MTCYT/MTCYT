@@ -10,6 +10,30 @@ const youtubers = [
         "url": "https://www.youtube.com/@MultiC12",
         "profileImg": "IMG_5500.jpeg",
         "subs": 12200
+    },
+    {
+        "name": "Game1k",
+        "id": "UCIiTOQP44lgYA6duuZnALfg",
+        "img": "IMG_5503.jpeg",
+        "url": "https://www.youtube.com/@game1kyt",
+        "profileImg": "IMG_5503.jpeg",
+        "subs": 0
+    },
+    {
+        "name": "Xrealm",
+        "id": "UCFQd2yZnvq-iJI7wz9jC2YA",
+        "img": "IMG_5499.jpeg",
+        "url": "https://www.youtube.com/@XREALM",
+        "profileImg": "IMG_5499.jpeg",
+        "subs": 0
+    },
+    {
+        "name": "ItzStrawberry",
+        "id": "UCPretZF6SLAIMIalsOQhBTg",
+        "img": "IMG_5502.jpeg",
+        "url": "https://www.youtube.com/@ItzStrawberry",
+        "profileImg": "IMG_5502.jpeg",
+        "subs": 0
     }
 ];
 
