@@ -1,6 +1,6 @@
 // ========================================
 // LIVE SUBSCRIBER COUNTS
-// Fetching from YouTube Data API via Alternative Method
+// Fetching from Livecounts.io using JSONP
 // ========================================
 const youtubers = [
     {
@@ -52,25 +52,31 @@ function formatNumber(num) {
     return num.toString();
 }
 
-// Fetch subscriber count from YouTube via yT-API
+// Fetch subscriber count by scraping from Livecounts.io page
 async function getSubscriberCount(channelId) {
     try {
-        const response = await fetch(`https://yt-api.p.rapidapi.com/channel/about?id=${channelId}`, {
-            method: 'GET',
-            headers: {
-                'x-rapidapi-key': 'a5f87e3a70msh1a8f5c8f2f8f2f8f2f8',
-                'x-rapidapi-host': 'yt-api.p.rapidapi.com'
-            }
-        });
+        // Use a CORS proxy to bypass restrictions
+        const response = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(`https://www.livecounts.io/youtube-live-subscriber-counter/${channelId}`)}`);
         
         if (!response.ok) {
-            console.warn(`Failed to fetch subscribers for ${channelId}: ${response.status}`);
+            console.warn(`Failed to fetch page for ${channelId}`);
             return null;
         }
         
-        const data = await response.json();
-        const subsStr = data.stats?.subscribers?.replace(/[^0-9]/g, '');
-        return subsStr ? parseInt(subsStr, 10) : null;
+        const html = await response.text();
+        
+        // Look for the subscriber count in the HTML
+        const match = html.match(/subscribers['"]\s*:\s*['"]*(\d+(?:,\d+)*)/i) || 
+                      html.match(/subscriberCount['"]\s*:\s*['"]*(\d+(?:,\d+)*)/i) ||
+                      html.match(/>(\d+(?:,\d+)*)\s*<\/span>\s*<\/div>\s*<p>Subscribers/);
+        
+        if (match && match[1]) {
+            const subsStr = match[1].replace(/,/g, '');
+            return parseInt(subsStr, 10);
+        }
+        
+        console.warn(`Could not extract subscriber count from ${channelId}`);
+        return null;
     } catch (error) {
         console.error(`Error fetching subscriber count for ${channelId}:`, error);
         return null;
@@ -125,7 +131,7 @@ async function loadYouTubers() {
                 const subs = await getSubscriberCount(youtuber.id);
                 return {
                     ...youtuber,
-                    subs: subs || youtuber.subs // Use fetched count or keep existing
+                    subs: subs !== null ? subs : youtuber.subs // Use fetched count or keep existing
                 };
             })
         );
@@ -138,6 +144,8 @@ async function loadYouTubers() {
         
         // Update timestamp
         updateTimestamp();
+        
+        console.log('Dashboard updated with live subscriber counts');
     } catch (error) {
         console.error('Error loading YouTube data:', error);
         dashboard.innerHTML = '<p class="loading" style="color: #ff6666;">Error loading channel data. Please try again later.</p>';
