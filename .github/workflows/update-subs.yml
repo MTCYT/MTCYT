@@ -2,19 +2,19 @@ name: Update YouTube Subscriber Counts
 
 on:
   schedule:
-    - cron: '*/1 * * * *'  # Every 5 minutes
+    - cron: '*/1 * * * *'  # Every 1 minute
   workflow_dispatch:  # Allow manual trigger
 
 jobs:
   update-subs:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       
       - name: Set up Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
       
       - name: Update subscriber counts
         env:
