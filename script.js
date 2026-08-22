@@ -1,6 +1,7 @@
 // ========================================
 // LIVE SUBSCRIBER COUNTS
-// Fetching from Livecounts.io using JSONP
+// Using embedded Livecounts.io widgets (off-screen)
+// Data extracted to populate cards
 // ========================================
 const youtubers = [
     {
@@ -9,7 +10,8 @@ const youtubers = [
         "img": "IMG_5500.jpeg",
         "url": "https://www.youtube.com/@MultiC12",
         "profileImg": "IMG_5500.jpeg",
-        "subs": 0
+        "subs": 0,
+        "liveCountsUrl": "https://livecounts.io/youtube-live-subscriber-counter/UCdCp7TeckzYLlAlxx2AgZlw"
     },
     {
         "name": "Game1k",
@@ -17,7 +19,8 @@ const youtubers = [
         "img": "IMG_5503.jpeg",
         "url": "https://www.youtube.com/@game1kyt",
         "profileImg": "IMG_5503.jpeg",
-        "subs": 0
+        "subs": 0,
+        "liveCountsUrl": "https://livecounts.io/youtube-live-subscriber-counter/UCIiTOQP44lgYA6duuZnALfg"
     },
     {
         "name": "ItzStrawberry",
@@ -25,7 +28,8 @@ const youtubers = [
         "img": "IMG_5502.jpeg",
         "url": "https://www.youtube.com/@ItzStrawberry",
         "profileImg": "IMG_5502.jpeg",
-        "subs": 0
+        "subs": 0,
+        "liveCountsUrl": "https://livecounts.io/youtube-live-subscriber-counter/UCPretZF6SLAIMIalsOQhBTg"
     },
     {
         "name": "Xrealm",
@@ -33,7 +37,8 @@ const youtubers = [
         "img": "IMG_5499.jpeg",
         "url": "https://www.youtube.com/@XREALM",
         "profileImg": "IMG_5499.jpeg",
-        "subs": 0
+        "subs": 0,
+        "liveCountsUrl": "https://livecounts.io/youtube-live-subscriber-counter/UCFQd2yZnvq-iJI7wz9jC2YA"
     }
 ];
 
@@ -52,35 +57,93 @@ function formatNumber(num) {
     return num.toString();
 }
 
-// Fetch subscriber count by scraping from Livecounts.io page
-async function getSubscriberCount(channelId) {
-    try {
-        // Use a CORS proxy to bypass restrictions
-        const response = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(`https://www.livecounts.io/youtube-live-subscriber-counter/${channelId}`)}`);
-        
-        if (!response.ok) {
-            console.warn(`Failed to fetch page for ${channelId}`);
-            return null;
+// Fetch subscriber count by loading iframe and extracting data
+async function getSubscriberCount(channelUrl, youtuberName) {
+    return new Promise((resolve) => {
+        try {
+            // Create an iframe to load the page
+            const iframe = document.createElement('iframe');
+            iframe.style.display = 'none';
+            iframe.style.position = 'absolute';
+            iframe.style.left = '-9999px';
+            iframe.src = channelUrl;
+            
+            iframe.onload = function() {
+                try {
+                    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                    
+                    // Try multiple selectors to find the subscriber count
+                    let subsText = null;
+                    
+                    // Try to find span with subscriber count
+                    const spans = iframeDoc.querySelectorAll('span');
+                    for (let span of spans) {
+                        const text = span.textContent.trim();
+                        if (text.match(/^\d+(?:,\d+)*(?:\.\d+)?[MK]?$/) && text.length > 2) {
+                            subsText = text;
+                            break;
+                        }
+                    }
+                    
+                    // Try divs if spans didn't work
+                    if (!subsText) {
+                        const divs = iframeDoc.querySelectorAll('div');
+                        for (let div of divs) {
+                            const text = div.textContent.trim();
+                            if (text.match(/^\d+(?:,\d+)*(?:\.\d+)?[MK]?$/) && text.length > 2) {
+                                subsText = text;
+                                break;
+                            }
+                        }
+                    }
+                    
+                    if (subsText) {
+                        // Convert formatted number to actual number
+                        let numValue = subsText.replace(/,/g, '');
+                        if (numValue.endsWith('M')) {
+                            numValue = parseFloat(numValue.slice(0, -1)) * 1000000;
+                        } else if (numValue.endsWith('K')) {
+                            numValue = parseFloat(numValue.slice(0, -1)) * 1000;
+                        } else {
+                            numValue = parseInt(numValue, 10);
+                        }
+                        
+                        console.log(`✓ ${youtuberName}: ${subsText} (${numValue})`);
+                        resolve(Math.floor(numValue));
+                    } else {
+                        console.warn(`Could not find subscriber count for ${youtuberName}`);
+                        resolve(null);
+                    }
+                } catch (error) {
+                    console.error(`Error reading iframe for ${youtuberName}:`, error);
+                    resolve(null);
+                }
+                
+                // Remove iframe after we're done
+                setTimeout(() => iframe.remove(), 100);
+            };
+            
+            iframe.onerror = function() {
+                console.warn(`Failed to load iframe for ${youtuberName}`);
+                iframe.remove();
+                resolve(null);
+            };
+            
+            document.body.appendChild(iframe);
+            
+            // Timeout after 10 seconds
+            setTimeout(() => {
+                if (iframe.parentNode) {
+                    console.warn(`Timeout loading ${youtuberName}`);
+                    iframe.remove();
+                    resolve(null);
+                }
+            }, 10000);
+        } catch (error) {
+            console.error(`Error fetching subscriber count for ${youtuberName}:`, error);
+            resolve(null);
         }
-        
-        const html = await response.text();
-        
-        // Look for the subscriber count in the HTML
-        const match = html.match(/subscribers['"]\s*:\s*['"]*(\d+(?:,\d+)*)/i) || 
-                      html.match(/subscriberCount['"]\s*:\s*['"]*(\d+(?:,\d+)*)/i) ||
-                      html.match(/>(\d+(?:,\d+)*)\s*<\/span>\s*<\/div>\s*<p>Subscribers/);
-        
-        if (match && match[1]) {
-            const subsStr = match[1].replace(/,/g, '');
-            return parseInt(subsStr, 10);
-        }
-        
-        console.warn(`Could not extract subscriber count from ${channelId}`);
-        return null;
-    } catch (error) {
-        console.error(`Error fetching subscriber count for ${channelId}:`, error);
-        return null;
-    }
+    });
 }
 
 // Render dashboard with YouTubers using live subscriber data
@@ -95,7 +158,6 @@ function renderDashboard(data) {
     data.forEach((youtuber, index) => {
         const card = document.createElement('div');
         card.className = 'youtuber-card';
-        // Use profileImg if present, otherwise fall back to img, otherwise a placeholder with the channel name
         const imgSrc = youtuber.profileImg || youtuber.img || (`https://via.placeholder.com/120?text=${encodeURIComponent(youtuber.name)}`);
         const onErrorSrc = `https://via.placeholder.com/120?text=${encodeURIComponent(youtuber.name)}`;
         card.innerHTML = `
@@ -110,7 +172,7 @@ function renderDashboard(data) {
     });
 }
 
-// Show loading spinner briefly
+// Show loading spinner
 function showLoadingSpinner() {
     dashboard.innerHTML = '<div class="loading"><div class="spinner"></div><p>Loading Multicraft Channels...</p></div>';
 }
@@ -125,13 +187,15 @@ async function loadYouTubers() {
     showLoadingSpinner();
     
     try {
+        console.log('Fetching subscriber counts from Livecounts.io...');
+        
         // Fetch subscriber counts for all channels
         const updatedYoutubers = await Promise.all(
             youtubers.map(async (youtuber) => {
-                const subs = await getSubscriberCount(youtuber.id);
+                const subs = await getSubscriberCount(youtuber.liveCountsUrl, youtuber.name);
                 return {
                     ...youtuber,
-                    subs: subs !== null ? subs : youtuber.subs // Use fetched count or keep existing
+                    subs: subs !== null ? subs : youtuber.subs
                 };
             })
         );
