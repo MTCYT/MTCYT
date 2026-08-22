@@ -9,10 +9,12 @@
     .counters { display:flex; gap:16px; flex-wrap:wrap; }
     .counter { width:300px; height:120px; border:1px solid #ddd; border-radius:8px; overflow:hidden; display:flex; flex-direction:column; align-items:stretch; justify-content:flex-start; background:#fff; }
     .counter .frame { flex:0 0 90px; }
-    .counter iframe { width:100%; height:100%; border:0; display:block; }
+    .counter iframe { width:100%; height:100%; border:0; display:block; background:#fff; z-index:10; }
     .counter .meta { padding:8px 10px; font-size:13px; color:#333; background:#fafafa; border-top:1px solid #eee; display:flex; justify-content:space-between; align-items:center; }
     .counter .meta a { font-size:12px; color:#0366d6; text-decoration:none; }
     .note { margin-bottom:12px; color:#555; }
+    /* Debug helpers to ensure iframe is visible and not covered */
+    .debug-outline iframe { outline: 3px solid rgba(0,255,0,0.35); }
     @media (max-width:640px) { .counter { width:100%; } }
   </style>
 </head>
@@ -20,23 +22,24 @@
   <h2>Multicraft YouTuber Live Subs</h2>
   <p class="note">If a widget appears blank the provider may block embedding. Use the "open" link to view the live counter in a new tab.</p>
   <div class="counters">
-    <div class="counter">
-      <div class="frame"><iframe src="https://livecounts.xyz/embed/youtube-live-subscriber-counter/UCFQd2yZnvq-iJI7wz9jC2YA" width="300" height="90" frameborder="0" allowtransparency="true" scrolling="no"></iframe></div>
-      <div class="meta"><span>Channel 1</span><a href="https://livecounts.io/youtube-live-subscriber-counter/UCFQd2yZnvq-iJI7wz9jC2YA" target="_blank" rel="noopener">Open</a></div>
+    <div class="counter debug-outline">
+      <div class="frame"><iframe src="https://livecounts.io/embed/youtube-live-subscriber-counter/UCFQd2yZnvq-iJI7wz9jC2YA" width="300" height="90" frameborder="0" allowtransparency="true" scrolling="no" title="XREALM live subscriber count"></iframe></div>
+      <div class="meta"><span>XREALM</span><a href="https://livecounts.io/youtube-live-subscriber-counter/UCFQd2yZnvq-iJI7wz9jC2YA" target="_blank" rel="noopener">Open</a></div>
     </div>
 
+    <!-- placeholders for other channels (keep existing structure) -->
     <div class="counter">
-      <div class="frame"><iframe src="https://livecounts.xyz/embed/youtube-live-subscriber-counter/UCdCp7TeckzYLlAlxx2AgZlw" width="300" height="90" frameborder="0" allowtransparency="true" scrolling="no"></iframe></div>
+      <div class="frame"><iframe src="https://livecounts.xyz/embed/youtube-live-subscriber-counter/UCdCp7TeckzYLlAlxx2AgZlw" width="300" height="90" frameborder="0" allowtransparency="true" scrolling="no" title="Channel 2 live subscriber count"></iframe></div>
       <div class="meta"><span>Channel 2</span><a href="https://livecounts.io/youtube-live-subscriber-counter/UCdCp7TeckzYLlAlxx2AgZlw" target="_blank" rel="noopener">Open</a></div>
     </div>
 
     <div class="counter">
-      <div class="frame"><iframe src="https://livecounts.xyz/embed/youtube-live-subscriber-counter/UCPretZF6SLAIMIalsOQhBTg" width="300" height="90" frameborder="0" allowtransparency="true" scrolling="no"></iframe></div>
+      <div class="frame"><iframe src="https://livecounts.xyz/embed/youtube-live-subscriber-counter/UCPretZF6SLAIMIalsOQhBTg" width="300" height="90" frameborder="0" allowtransparency="true" scrolling="no" title="Channel 3 live subscriber count"></iframe></div>
       <div class="meta"><span>Channel 3</span><a href="https://livecounts.io/youtube-live-subscriber-counter/UCPretZF6SLAIMIalsOQhBTg" target="_blank" rel="noopener">Open</a></div>
     </div>
 
     <div class="counter">
-      <div class="frame"><iframe src="https://livecounts.xyz/embed/youtube-live-subscriber-counter/UCIiTOQP44lgYA6duuZnALfg" width="300" height="90" frameborder="0" allowtransparency="true" scrolling="no"></iframe></div>
+      <div class="frame"><iframe src="https://livecounts.xyz/embed/youtube-live-subscriber-counter/UCIiTOQP44lgYA6duuZnALfg" width="300" height="90" frameborder="0" allowtransparency="true" scrolling="no" title="Channel 4 live subscriber count"></iframe></div>
       <div class="meta"><span>Channel 4</span><a href="https://livecounts.io/youtube-live-subscriber-counter/UCIiTOQP44lgYA6duuZnALfg" target="_blank" rel="noopener">Open</a></div>
     </div>
 
